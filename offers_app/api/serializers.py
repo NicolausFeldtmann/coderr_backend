@@ -1,0 +1,201 @@
+from rest_framework import serializers
+from django.contrib.auth.models import User
+from offers_app.models import OfferModel, OfferDetails
+from django.urls import reverse
+
+""" Serializers for user details. """
+class UserDetailsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = User
+        fields = ["id", "username", "email", "first_name", "last_name"]
+
+""" Converts data needed to list all offer details. """
+class DetailsListSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OfferDetails
+        fields = ["id", "url"]
+
+    def get_url(self, obj):
+        return f"/api/offerdetails/{obj.id}/"
+
+""" Converts data needed to list all fields of specific offer detail. """
+class DetailSerializer(serializers.ModelSerializer):
+    delivery_time_in_days = serializers.IntegerField(write_only=True, required=False)
+
+    class Meta:
+        model = OfferDetails
+        fields = [
+            "id",
+            "title",
+            "revisions",
+            "delivery_time_in_days",
+            "price",
+            "features",
+            "offer_type"
+        ]
+        read_only_fields = ["id"]
+        extra_kwargs = {'offer_type': {'required': True}}
+
+    def validate(self, attrs):
+        if "delivery_time_in_days" in attrs:
+            attrs["delivery_time"] = attrs.pop("delivery_time_in_days")
+        return attrs
+
+    def to_representation(self, instance):
+        from collections import OrderedDict
+        return OrderedDict([
+            ('id', instance.id),
+            ('title', instance.title),
+            ('revisions', instance.revisions),
+            ('delivery_time_in_days', instance.delivery_time),
+            ('price', instance.price),
+            ('features', instance.features),
+            ('offer_type', instance.offer_type)
+        ])
+
+""" Converts data needed for offer list requests. """
+class OfferListSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    details = serializers.SerializerMethodField()
+    user_details = serializers.SerializerMethodField()
+    min_price = serializers.SerializerMethodField()
+    min_delivery_time = serializers.SerializerMethodField()
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = OfferModel
+        fields = [
+            "id",
+            "user",
+            "title",
+            "image",
+            "description",
+            "created_at",
+            "updated_at",
+            "details",
+            "min_price",
+            "min_delivery_time",
+            "user_details"
+        ]
+        read_only_fields = ["created_at", "updated_at"]
+
+    def get_details(self, obj):
+        details_qs = obj.details.all()
+        request = self.context.get('request')
+
+        if request:
+            min_price = request.query_params.get('min_price')
+            if min_price:
+                min_price = int(min_price)
+                details_qs = details_qs.filter(price__gte=min_price)
+
+            max_price = request.query_params.get('max_price')
+            if max_price:
+                max_price = int(max_price)
+                details_qs = details_qs.filter(price__lte=max_price)
+
+            min_delivery_time = request.query_params.get('min_delivery_time')
+            if min_delivery_time:
+                min_delivery_time = int(min_delivery_time)
+                details_qs = details_qs.filter(delivery_time__gte=min_delivery_time)
+
+            max_delivery_time = request.query_params.get('max_delivery_time')
+            if max_delivery_time:
+                max_delivery_time = int(max_delivery_time)
+                details_qs = details_qs.filter(delivery_time__lte=max_delivery_time)
+
+        return DetailsListSerializer(details_qs, many=True).data
+
+    def get_user_details(self, obj):
+        user_serializer = UserDetailsSerializer(obj.user, read_only=True)
+        return user_serializer.data
+
+    def get_min_price(self, obj):
+        prices = obj.details.values_list('price', flat=True)
+        return min(prices) if prices else None
+
+    def get_min_delivery_time(self, obj):
+        times = obj.details.values_list('delivery_time', flat=True)
+        return min(times) if times else None
+
+""" Main offer serializer to create and update. """
+class OfferSerializer(serializers.ModelSerializer):
+    details = DetailSerializer(many=True, required=False)
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = OfferModel
+        fields = ["id", "title", "image", "description", "details"]
+
+    def validate_details(self, value):
+        if self.instance is None and not value:
+            raise serializers.ValidationError({"error": "Details required"})
+
+        for detail in value:
+            if not detail.get("offer_type") or detail.get("offer_type").strip() == "":
+                raise serializers.ValidationError({"error": "Offer-type is required"})
+        return value
+
+    def create(self, validated_data):
+        details_data = validated_data.pop("details", [])
+        user = self.context['request'].user
+
+        offer = OfferModel.objects.create(user=user, **validated_data)
+
+        for detail_data in details_data:
+            OfferDetails.objects.create(offer=offer, **detail_data)
+        return offer
+
+    """ Handles Update function and assures the details keep their ID. """
+    def update(self, instance, validated_data):
+        details_data = validated_data.pop("details", None)
+
+        for field in ("title", "description", "image"):
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+        instance.save()
+
+        if details_data:
+            existing_by_type = {detail.offer_type: detail for detail in instance.details.all()}
+            for detail_data in details_data:
+                if (detail := existing_by_type.get(detail_data.get("offer_type"))):
+                    revisions_to_add = detail_data.pop("revisions", 0) or 0
+                    for attr, value in detail_data.items():
+                        setattr(detail, attr, value)
+                    detail.revisions = (detail.revisions or 0) + revisions_to_add
+                    detail.save()
+        return instance
+
+""" OfferSerializer to handle GET request. """
+class OfferRetriveSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    details = DetailsListSerializer(many=True, read_only=True)
+    min_price = serializers.SerializerMethodField()
+    min_delivery_time = serializers.SerializerMethodField()
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = OfferModel
+        fields = [
+            "id",
+            "user",
+            "title",
+            "image",
+            "description",
+            "created_at",
+            "updated_at",
+            "details",
+            "min_price",
+            "min_delivery_time"
+        ]
+
+    def get_min_price(self, obj):
+        prices = obj.details.values_list("price", flat=True)
+        return min(prices) if prices else None
+
+    def get_min_delivery_time(self, obj):
+        times = obj.details.values_list("delivery_time", flat=True)
+        return min(times) if times else None
