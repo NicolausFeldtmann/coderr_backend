@@ -52,3 +52,6 @@ class OfferDetailsRetrieveView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['title', 'price', 'delivery_time', 'offer_type']
+
+
+    
