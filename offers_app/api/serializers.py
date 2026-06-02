@@ -162,10 +162,8 @@ class OfferSerializer(serializers.ModelSerializer):
             existing_by_type = {detail.offer_type: detail for detail in instance.details.all()}
             for detail_data in details_data:
                 if (detail := existing_by_type.get(detail_data.get("offer_type"))):
-                    revisions_to_add = detail_data.pop("revisions", 0) or 0
                     for attr, value in detail_data.items():
                         setattr(detail, attr, value)
-                    detail.revisions = (detail.revisions or 0) + revisions_to_add
                     detail.save()
         return instance
 
