@@ -5,8 +5,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from reviews_app.models import ReviewModel
 
-""" Validated data needed for POST or GET order requests """
 class OrderSerializer(serializers.ModelSerializer):
+    """ Validated data needed for POST or GET order requests """
     revisions = serializers.SerializerMethodField()
 
     class Meta:
@@ -45,8 +45,9 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_business_user(self, obj):
         return obj.business_user.id
 
-""" Converts needed data to handle POST request. """
 class CreateOrderSerializer(serializers.Serializer):
+    """ Converts needed data to handle POST request. """
+
     offer_detail_id = serializers.IntegerField()
 
     def create(self, validated_data):
@@ -69,8 +70,8 @@ class CreateOrderSerializer(serializers.Serializer):
         )
         return order
 
-""" Converts needed data to handle PATCH order requests. """
 class UpdateSerializer(serializers.ModelSerializer):
+    """ Converts needed data to handle PATCH order requests. """
 
     class Meta:
         model = OrderModel

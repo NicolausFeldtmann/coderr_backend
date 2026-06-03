@@ -5,8 +5,9 @@ from reviews_app.models import ReviewModel
 from .serializers import ReviewSerializer, UpdateSerializer
 from .permissions import IsCustomer, IsReviewAuthorOrReadOnly
 
-""" Handles GET and POST requests for reviews. """
 class ReviewListView(generics.ListCreateAPIView):
+    """ Handles GET and POST requests for reviews. """
+
     queryset = ReviewModel.objects.all()
     serializer_class = ReviewSerializer
     pagination_class = None
@@ -19,8 +20,9 @@ class ReviewListView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save()
 
-""" handles PATCH and DELETE requests for specific reviews. """
 class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """ handles PATCH and DELETE requests for specific reviews. """
+
     queryset = ReviewModel.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticated, IsReviewAuthorOrReadOnly]

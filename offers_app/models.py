@@ -2,8 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-""" Model-class to define 'OfferModel' and containing imformation. """
 class OfferModel(models.Model):
+    """ Model-class to define 'OfferModel' and containing imformation. """
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     image = models.ImageField(upload_to="offers/", null=True, blank=True)
@@ -14,8 +15,9 @@ class OfferModel(models.Model):
     def __str__(self):
         return self.title
 
-""" Model-class to define 'OfferDetails' and containing imformation of offer details. """
 class OfferDetails(models.Model):
+    """ Model-class to define 'OfferDetails' and containing imformation of offer details. """
+
     offer = models.ForeignKey(OfferModel, related_name="details", null=True, blank=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     revisions = models.IntegerField(blank=True, null=True, default=0)

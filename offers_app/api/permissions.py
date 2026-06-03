@@ -1,8 +1,8 @@
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
 from user_auth_app.models import UserProfile
 
-""" Custom permission class that grants admin or profile-user full authorization. """
 class IsOwnerOrAdmin(BasePermission):
+    """ Custom permission class that grants admin or profile-user full authorization. """
 
     def has_object_permission(self, request, view, obj):
         if request.user and request.user.is_staff:
@@ -10,8 +10,8 @@ class IsOwnerOrAdmin(BasePermission):
 
         return obj.user == request.user or request.user.is_superuser
 
-""" Custom permission class that garants admin or offer-user fullauthorization. """
 class IsOfferAuthorOrAdmin(BasePermission):
+    """ Custom permission class that garants admin or offer-user fullauthorization. """
 
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:

@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission, IsAuthenticated, SAFE_METHODS
 
-""" Custom permission class that grants admin or profile-user full authorization. """
 class IsOwnerOrAdmin(BasePermission):
+    """ Custom permission class that grants admin or profile-user full authorization. """
 
     def has_object_permission(slef, request, view, obj):
         if not request.user or not request.user.is_authenticated:

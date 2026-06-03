@@ -9,14 +9,16 @@ from user_auth_app.models import UserProfile
 from .serializers import RegistrationSerializer, UsernameAuthSerializer, UserProfileSerializer, SingleUserSerializer, BusinessProfileSerializer, CustomerProfileSerializer
 from .permissions import IsOwnerOrAdmin
 
-""" View to handle GET, PATCH and DELETE requests. """
 class UserProfileView(generics.RetrieveUpdateDestroyAPIView):
+    """ View to handle GET, PATCH and DELETE requests. """
+
     permission_classes = [IsOwnerOrAdmin]
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
 
-""" View to handle GET requestes for business-profiles only. """
 class BusinessProfileListView(generics.ListAPIView):
+    """ View to handle GET requestes for business-profiles only. """
+
     permission_classes = [IsAuthenticated]
     serializer_class = BusinessProfileSerializer
     pagination_class = None
@@ -24,8 +26,9 @@ class BusinessProfileListView(generics.ListAPIView):
     def get_queryset(self):
         return UserProfile.objects.filter(role='business')
 
-""" View to handle GET requestes for customer-profiles only. """
 class CustomerProfileListView(generics.ListAPIView):
+    """ View to handle GET requestes for customer-profiles only. """
+
     permission_classes = [IsAuthenticated]
     serializer_class = CustomerProfileSerializer
     pagination_class = None
@@ -33,8 +36,9 @@ class CustomerProfileListView(generics.ListAPIView):
     def get_queryset(self):
         return UserProfile.objects.filter(role='customer')
 
-""" View to handle POST request for registration attempt. """
 class RegistrationView(APIView):
+    """ View to handle POST request for registration attempt. """
+
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -52,8 +56,9 @@ class RegistrationView(APIView):
             return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-""" View to handle login attempt with username/password combination or authtoken. """
 class CustomLoginView(ObtainAuthToken):
+    """ View to handle login attempt with username/password combination or authtoken. """
+
     permission_classes = [AllowAny]
     serializer_class = UsernameAuthSerializer
 

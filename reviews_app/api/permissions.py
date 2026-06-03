@@ -1,8 +1,8 @@
 from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS
 from user_auth_app.models import UserProfile
 
-""" Custompermission class to identify user type. """
 class IsCustomer(BasePermission):
+    """ Custompermission class to identify user type. """
 
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
@@ -14,8 +14,8 @@ class IsCustomer(BasePermission):
         except UserProfile.DoesNotExist:
             return False
 
-""" Custompermission class allowns all user GET reqauest. But onyl reviwe author PATCH or DELETE requests. """
 class IsReviewAuthorOrReadOnly(BasePermission):
+    """ Custompermission class allowns all user GET reqauest. But onyl reviwe author PATCH or DELETE requests. """
 
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated

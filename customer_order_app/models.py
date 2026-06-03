@@ -3,8 +3,8 @@ from offers_app.models import OfferModel, OfferDetails
 from user_auth_app.models import UserProfile
 from django.contrib.auth.models import User
 
-""" Class to define all containing infromations of orders. """
 class OrderModel(models.Model):
+    """ Class to define all containing infromations of orders. """
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('in_progress', 'In_progress'),

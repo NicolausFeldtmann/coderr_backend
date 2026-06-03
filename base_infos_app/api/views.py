@@ -9,12 +9,12 @@ from reviews_app.models import ReviewModel
 from offers_app.models import OfferModel
 from user_auth_app.models import UserProfile
 
-""" View to handle GET requests for base informations. """
 class BaseInfoView(APIView):
+    """ View to handle GET requests for base informations. """
     permission_classes = [AllowAny]
 
-    """ Calculates all needed numbers. """
     def get(self, request):
+        """ Calculates all needed numbers. """
         review_count = ReviewModel.objects.count()
         average_rating = ReviewModel.objects.aggregate(avg_rating=Avg('rating'))['avg_rating'] or 0
         business_profile_count = UserProfile.objects.filter(role='business').count()

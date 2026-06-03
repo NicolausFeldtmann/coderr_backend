@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 from reviews_app.models import ReviewModel
 from user_auth_app.models import UserProfile
 
-""" Conferts data to handle reives requests. """
 class ReviewSerializer(serializers.ModelSerializer):
+    """ Conferts data to handle reives requests. """
 
     class Meta:
         model = ReviewModel
@@ -41,8 +41,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         reviewer_profile = UserProfile.objects.get(user=user)
         return ReviewModel.objects.create(user=user, reviewer=reviewer_profile, **validated_data)
 
-""" Converts data to handle PATCH requests for reviews. """
 class UpdateSerializer(serializers.ModelSerializer):
+    """ Converts data to handle PATCH requests for reviews. """
 
     class Meta:
         model = ReviewModel

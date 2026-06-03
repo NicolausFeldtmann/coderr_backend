@@ -4,6 +4,8 @@ from django_filters import FilterSet, NumberFilter, CharFilter, OrderingFilter
 from offers_app.models import OfferModel
 
 class CustomOfferFilter(FilterSet):
+    """ Custom filter class. Allows filtering of offers based specific params """
+
     min_price = NumberFilter(field_name='details__price', lookup_expr='gte')
     max_price = NumberFilter(field_name='details__price', lookup_expr='lte')
     max_delivery_time = NumberFilter(field_name='details__delivery_time', lookup_expr='lte')

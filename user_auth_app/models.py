@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-"""Defines UserProfiles and containing informations."""
 class UserProfile(models.Model):
+    """Defines UserProfiles and containing informations."""
 
     ROLE_CHOICES = [
         ("customer", "Customer"),

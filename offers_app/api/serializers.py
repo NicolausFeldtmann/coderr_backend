@@ -3,15 +3,16 @@ from django.contrib.auth.models import User
 from offers_app.models import OfferModel, OfferDetails
 from django.urls import reverse
 
-""" Serializers for user details. """
 class UserDetailsSerializer(serializers.ModelSerializer):
+    """ Serializers for user details. """
     
     class Meta:
         model = User
         fields = ["id", "username", "email", "first_name", "last_name"]
 
-""" Converts data needed to list all offer details. """
 class DetailsListSerializer(serializers.ModelSerializer):
+    """ Converts data needed to list all offer details. """
+
     url = serializers.SerializerMethodField()
 
     class Meta:
@@ -21,8 +22,9 @@ class DetailsListSerializer(serializers.ModelSerializer):
     def get_url(self, obj):
         return f"/api/offerdetails/{obj.id}/"
 
-""" Converts data needed to list all fields of specific offer detail. """
 class DetailSerializer(serializers.ModelSerializer):
+    """ Converts data needed to list all fields of specific offer detail. """
+
     delivery_time_in_days = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
@@ -56,8 +58,9 @@ class DetailSerializer(serializers.ModelSerializer):
             ('offer_type', instance.offer_type)
         ])
 
-""" Converts data needed for offer list requests. """
 class OfferListSerializer(serializers.ModelSerializer):
+    """ Converts data needed for offer list requests. """
+
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     details = serializers.SerializerMethodField()
     user_details = serializers.SerializerMethodField()
@@ -121,8 +124,9 @@ class OfferListSerializer(serializers.ModelSerializer):
         times = obj.details.values_list('delivery_time', flat=True)
         return min(times) if times else None
 
-""" Main offer serializer to create and update. """
 class OfferSerializer(serializers.ModelSerializer):
+    """ Main offer serializer to create and update. """
+
     details = DetailSerializer(many=True, required=False)
     image = serializers.ImageField(required=False, allow_null=True)
 
@@ -149,7 +153,6 @@ class OfferSerializer(serializers.ModelSerializer):
             OfferDetails.objects.create(offer=offer, **detail_data)
         return offer
 
-    """ Handles Update function and assures the details keep their ID. """
     def update(self, instance, validated_data):
         details_data = validated_data.pop("details", None)
 
@@ -167,8 +170,9 @@ class OfferSerializer(serializers.ModelSerializer):
                     detail.save()
         return instance
 
-""" OfferSerializer to handle GET request. """
 class OfferRetriveSerializer(serializers.ModelSerializer):
+    """ OfferSerializer to handle GET request. """
+
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     details = DetailsListSerializer(many=True, read_only=True)
     min_price = serializers.SerializerMethodField()

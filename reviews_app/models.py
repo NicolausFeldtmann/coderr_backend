@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from user_auth_app.models import UserProfile
 
 class ReviewModel(models.Model):
+    """ Model-class to define review and containing fields. """
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     business_user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='business_reviews')
     reviewer = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='reviews_written')

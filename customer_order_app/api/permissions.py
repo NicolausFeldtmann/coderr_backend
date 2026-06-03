@@ -2,9 +2,9 @@ from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_MET
 from user_auth_app.models import UserProfile
 from django.contrib.auth.models import User
 
-""" Custompermission class to detect user type. """
 class IsCustomer(BasePermission):
-
+    """ Custompermission class to detect user type. """
+    
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
@@ -16,8 +16,8 @@ class IsCustomer(BasePermission):
         except UserProfile.DoesNotExist:
             return False
 
-""" Custompermission class to detect if user is order business-user. """
 class IsOrderOwner(BasePermission):
+    """ Custompermission class to detect if user is order business-user. """
 
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated
