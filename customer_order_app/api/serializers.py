@@ -7,24 +7,10 @@ from reviews_app.models import ReviewModel
 
 class OrderSerializer(serializers.ModelSerializer):
     """ Validated data needed for POST or GET order requests """
-    revisions = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderModel
-        fields = [
-            "id",
-            "customer_user",
-            "business_user",
-            "title",
-            "revisions",
-            "delivery_time_in_days",
-            "price",
-            "features",
-            "offer_type",
-            "status",
-            "created_at",
-            "updated_at"
-        ]
+        fields = '__all__'
         read_only_fields = [
             "id",
             "customer_user",
@@ -39,9 +25,6 @@ class OrderSerializer(serializers.ModelSerializer):
             "updated_at"
         ]
 
-    def get_revisions(self, obj):
-        return obj.offer_detail.revisions
-
     def get_business_user(self, obj):
         return obj.business_user.id
 
@@ -51,6 +34,8 @@ class CreateOrderSerializer(serializers.Serializer):
     offer_detail_id = serializers.IntegerField()
 
     def create(self, validated_data):
+        """ Function to validate offer_detail and create order if offer_detail is valid. """
+
         offer_detail_id = validated_data.pop("offer_detail_id")
         user = self.context["request"].user
 

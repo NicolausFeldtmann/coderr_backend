@@ -1,18 +1,29 @@
 from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import BasePagination
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from customer_order_app.models import OrderModel
 from .serializers import OrderSerializer, CreateOrderSerializer, UpdateSerializer
 from .permissions import IsOrderOwner, IsCustomer
 
-class OrderViewSet(generics.ListCreateAPIView):
+class NoPagination(BasePagination):
+    """ Deactivates paginations """
+
+    def paginate_queryset(self, queryset, request, view=None):
+        return list(queryset)
+
+    def get_paginated_response(self, data):
+        return Response(data)
+
+class OrderViewSet(viewsets.ModelViewSet):
     """ View that handles incommig POST or GET requests for orders. """
     
     queryset = OrderModel.objects.all()
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = NoPagination
 
     def get_permissions(self):
         """ Method to set different permissions based on request method. """
@@ -22,18 +33,11 @@ class OrderViewSet(generics.ListCreateAPIView):
         return [IsAuthenticated()]
 
     def get_serializer_class(self):
-        """ Function that decides serializer-class depending of request type. """
-
-        if self.request.method == "POST":
+        if self.action == "create":
             return CreateOrderSerializer
+        elif self.action == "partial_update":
+            return UpdateSerializer
         return OrderSerializer
-
-    def list(self, request, *args, **kwargs):
-        """ Function to list all orders """
-
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         """ Function to create new order entry. """
@@ -44,23 +48,8 @@ class OrderViewSet(generics.ListCreateAPIView):
         output_serializer = OrderSerializer(order)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
-class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """ View to handle GET, PATCH and DELETE requests. """
-    queryset = OrderModel.objects.all()
-    serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated, IsOrderOwner]
-
-    def get_serializer_class(self):
-        """ Function that decides serializer-class depending of request type. """   
-
-        if self.request.method == "PATCH":
-            return UpdateSerializer
-        return OrderSerializer
-
     def partial_update(self, request, *args, **kwargs):
-        """ Function to patch existing order. """
-
-        kwargs["partial"] = True
+        """ Function to patch existing order and return full data. """
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)

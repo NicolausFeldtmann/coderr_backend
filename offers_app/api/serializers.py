@@ -42,11 +42,13 @@ class DetailSerializer(serializers.ModelSerializer):
         extra_kwargs = {'offer_type': {'required': True}}
 
     def validate(self, attrs):
+        """ Konverts an validates data to delivery_time. """
         if "delivery_time_in_days" in attrs:
             attrs["delivery_time"] = attrs.pop("delivery_time_in_days")
         return attrs
 
     def to_representation(self, instance):
+        """ Konverts data to delivery_time_in_days for representation. """
         from collections import OrderedDict
         return OrderedDict([
             ('id', instance.id),
@@ -86,6 +88,7 @@ class OfferListSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at", "updated_at"]
 
     def get_details(self, obj):
+        """ Filtering of OfferDetails without seperate endpoints """
         details_qs = obj.details.all()
         request = self.context.get('request')
 
@@ -113,14 +116,17 @@ class OfferListSerializer(serializers.ModelSerializer):
         return DetailsListSerializer(details_qs, many=True).data
 
     def get_user_details(self, obj):
+        """ Return all user-data. """
         user_serializer = UserDetailsSerializer(obj.user, read_only=True)
         return user_serializer.data
 
     def get_min_price(self, obj):
+        """ Returns lowes price in OfferDetails. """
         prices = obj.details.values_list('price', flat=True)
         return min(prices) if prices else None
 
     def get_min_delivery_time(self, obj):
+        """ Returns lowes delivery_time in OfferDetails. """
         times = obj.details.values_list('delivery_time', flat=True)
         return min(times) if times else None
 
@@ -135,6 +141,8 @@ class OfferSerializer(serializers.ModelSerializer):
         fields = ["id", "title", "image", "description", "details"]
 
     def validate_details(self, value):
+        """ Validates data for POST or PATCH purposes. """
+
         if self.instance is None and not value:
             raise serializers.ValidationError({"error": "Details required"})
 
@@ -144,6 +152,8 @@ class OfferSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        """ Creates offer and containig offer_details """
+
         details_data = validated_data.pop("details", [])
         user = self.context['request'].user
 
@@ -154,6 +164,8 @@ class OfferSerializer(serializers.ModelSerializer):
         return offer
 
     def update(self, instance, validated_data):
+        """ Updates given offer_fields. """
+
         details_data = validated_data.pop("details", None)
 
         for field in ("title", "description", "image"):
@@ -195,9 +207,13 @@ class OfferRetriveSerializer(serializers.ModelSerializer):
         ]
 
     def get_min_price(self, obj):
+        """ Returns lowest price in offer_detail """
+
         prices = obj.details.values_list("price", flat=True)
         return min(prices) if prices else None
 
     def get_min_delivery_time(self, obj):
+        """ Returns lowes delivery_time in offer_details. """
+
         times = obj.details.values_list("delivery_time", flat=True)
         return min(times) if times else None
