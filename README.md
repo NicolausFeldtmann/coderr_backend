@@ -50,6 +50,9 @@ python -m venv env && source venv/bin/activate
 
 # 3. Install dependencies
 pip install -r requirements.txt
+
+# 4. Start project
+python manage.py runserver
 ```
 
 ## 📦 Key Dependencies
@@ -159,12 +162,14 @@ sqlparse: 0.5.5
    - Windows: 
    - Unix/MacOS: 
 4. Install dependencies:
+5. 5. Start project
 
 - Windows:
 ```
 python -m venv env
 venv\Scripts\activate
 pip install -r requirements.txt
+python manage.py runserver
 ```
 
 - Unix/MacOS:
@@ -172,6 +177,7 @@ pip install -r requirements.txt
 python -m venv env
 source venv/bin/activate
 pip install -r requirements.txt
+python manage.py runserver
 ```
 
 ## 👥 Contributing
