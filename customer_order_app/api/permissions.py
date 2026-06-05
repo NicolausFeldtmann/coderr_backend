@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 
 class IsCustomer(BasePermission):
     """ Custompermission class to detect user type. """
-    
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
@@ -20,9 +19,11 @@ class IsOrderOwner(BasePermission):
     """ Custompermission class to detect if user is order business-user. """
 
     def has_permission(self, request, view):
+        """ Checks if user is authenticated. """
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
+        """ Handles permissions depending of user-role and request-type. """
         if request.method in SAFE_METHODS:
             return True
 

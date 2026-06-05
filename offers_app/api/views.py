@@ -19,14 +19,23 @@ class OfferListView(generics.ListCreateAPIView):
     search_fields = ['title', 'description', 'user__username']
 
     def get_serializer_class(self):
+        """ Handles serializers depending of request-type. """
         if self.request.method == "GET":
             return OfferListSerializer
         return OfferSerializer
 
     def perform_create(self, serializer):
-        serializer.save()
+        """ Creates offer with validated data. """
+        details_data = serializer.validated_data.pop("details", [])
+        user = self.request.user
+        offer = OfferModel.objects.create(user=user, **serializer.validated_data)
+
+        for detail_data in details_data:
+            OfferDetails.objects.create(offer=offer, **detail_data)
+        serializer.instance = offer
 
     def create(self, request, *args, **kwargs):
+        """ Replaces the default create funktion and uses the perform_create funktion. """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -42,6 +51,7 @@ class OfferDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsOfferAuthorOrAdmin, IsAuthenticated]
     
     def get_serializer_class(self):
+        """ Handles serializers depending of request type. """
         if self.request.method == "GET":
             return OfferRetriveSerializer
         return OfferSerializer
@@ -55,6 +65,3 @@ class OfferDetailsRetrieveView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['title', 'price', 'delivery_time', 'offer_type']
-
-
-    

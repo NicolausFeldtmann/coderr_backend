@@ -24,6 +24,7 @@ class BusinessProfileListView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
+        """ Filters all userprofiles and returns all busines-users. """
         return UserProfile.objects.filter(role='business')
 
 class CustomerProfileListView(generics.ListAPIView):
@@ -34,6 +35,7 @@ class CustomerProfileListView(generics.ListAPIView):
     pagination_class = None
 
     def get_queryset(self):
+        """ Filters all userprofiles and returns all customer-user. """
         return UserProfile.objects.filter(role='customer')
 
 class RegistrationView(APIView):
@@ -42,6 +44,7 @@ class RegistrationView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """ Handles allneeded data for registration POST-request. """
         serializer = RegistrationSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -63,6 +66,7 @@ class CustomLoginView(ObtainAuthToken):
     serializer_class = UsernameAuthSerializer
 
     def post(self, request):
+        """ Handels all needed data for login POST-request. """
         serializer = self.serializer_class(data=request.data)
 
         data = {}

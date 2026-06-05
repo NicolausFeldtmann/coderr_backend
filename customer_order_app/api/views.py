@@ -12,9 +12,11 @@ class NoPagination(BasePagination):
     """ Deactivates paginations """
 
     def paginate_queryset(self, queryset, request, view=None):
+        """ Cancels all pagination intructions. Returns all results in one list """
         return list(queryset)
 
     def get_paginated_response(self, data):
+        """ Returns all results without pagintation-wrapper. """
         return Response(data)
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -30,9 +32,12 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         if self.request.method == "POST":
             return [IsAuthenticated(), IsCustomer()]
-        return [IsAuthenticated()]
+        elif self.request.method == "PATCH":
+            return [IsAuthenticated(), IsOrderOwner()]
+        return [IsAuthenticated]
 
     def get_serializer_class(self):
+        """ Selects serializers for different operations. """
         if self.action == "create":
             return CreateOrderSerializer
         elif self.action == "partial_update":
@@ -64,6 +69,7 @@ class OrderCountView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        """ Retrives the sum of all orders of business-user. """
         business_user_id = self.kwargs.get('business_user_id')
         get_object_or_404(User, id=business_user_id)
 
@@ -80,6 +86,7 @@ class OrderCountCompletedView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        """ Retrieves the sum of all completed-orders. """
         business_user_id = self.kwargs.get('business_user_id')
         get_object_or_404(User, id=business_user_id)
 

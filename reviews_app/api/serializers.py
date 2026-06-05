@@ -35,12 +35,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"error": "Review already added."})
         return data
 
-    def create(self, validated_data):
-        request = self.context.get("request")
-        user = request.user if request else None
-        reviewer_profile = UserProfile.objects.get(user=user)
-        return ReviewModel.objects.create(user=user, reviewer=reviewer_profile, **validated_data)
-
 class UpdateSerializer(serializers.ModelSerializer):
     """ Converts data to handle PATCH requests for reviews. """
 
@@ -48,8 +42,9 @@ class UpdateSerializer(serializers.ModelSerializer):
         model = ReviewModel
         fields = ["rating", "description"]
 
-        def update(self, instance, validated_data):
-            instance.rating = validated_data.get('rating', instance.rating)
-            instance.description = validated_data.get('description', instance.description)
-            instance.save()
-            return instance
+    def update(self, instance, validated_data):
+        """ Updates rating and description. """
+        instance.rating = validated_data.get('rating', instance.rating)
+        instance.description = validated_data.get('description', instance.description)
+        instance.save()
+        return instance

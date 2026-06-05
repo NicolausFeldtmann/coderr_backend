@@ -30,7 +30,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
 class CreateOrderSerializer(serializers.Serializer):
     """ Converts needed data to handle POST request. """
-
     offer_detail_id = serializers.IntegerField()
 
     def create(self, validated_data):
@@ -38,9 +37,7 @@ class CreateOrderSerializer(serializers.Serializer):
 
         offer_detail_id = validated_data.pop("offer_detail_id")
         user = self.context["request"].user
-
         offer_detail = get_object_or_404(OfferDetails, id=offer_detail_id)
-
         order = OrderModel.objects.create(
             offer_detail=offer_detail,
             customer_user=user,
@@ -63,6 +60,7 @@ class UpdateSerializer(serializers.ModelSerializer):
         fields = ["status"]
 
     def update(self, instance, validated_data):
+        """ Handels order update via PATCH request. """
         instance.status = validated_data.get("status", instance.status)
         instance.save()
         return instance

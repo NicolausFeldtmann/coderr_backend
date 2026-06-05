@@ -5,6 +5,7 @@ class IsCustomer(BasePermission):
     """ Custompermission class to identify user type. """
 
     def has_permission(self, request, view):
+        """ Grants permission if user-role is customer. """
         if not request.user or not request.user.is_authenticated:
             return False
 
@@ -15,12 +16,14 @@ class IsCustomer(BasePermission):
             return False
 
 class IsReviewAuthorOrReadOnly(BasePermission):
-    """ Custompermission class allowns all user GET reqauest. But onyl reviwe author PATCH or DELETE requests. """
+    """ Custompermission class allowns all user GET request. But only reviwe-author PATCH or DELETE requests. """
 
     def has_permission(self, request, view):
+        """ Grants all authenticated and unauthenticated user GET request. """
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
+        """ Identifies review-author and grants PATCH and DELETE requests. """
         if request.method in SAFE_METHODS:
             return True
 

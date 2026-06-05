@@ -91,28 +91,6 @@ class OfferListSerializer(serializers.ModelSerializer):
         """ Filtering of OfferDetails without seperate endpoints """
         details_qs = obj.details.all()
         request = self.context.get('request')
-
-        if request:
-            min_price = request.query_params.get('min_price')
-            if min_price:
-                min_price = int(min_price)
-                details_qs = details_qs.filter(price__gte=min_price)
-
-            max_price = request.query_params.get('max_price')
-            if max_price:
-                max_price = int(max_price)
-                details_qs = details_qs.filter(price__lte=max_price)
-
-            min_delivery_time = request.query_params.get('min_delivery_time')
-            if min_delivery_time:
-                min_delivery_time = int(min_delivery_time)
-                details_qs = details_qs.filter(delivery_time__gte=min_delivery_time)
-
-            max_delivery_time = request.query_params.get('max_delivery_time')
-            if max_delivery_time:
-                max_delivery_time = int(max_delivery_time)
-                details_qs = details_qs.filter(delivery_time__lte=max_delivery_time)
-
         return DetailsListSerializer(details_qs, many=True).data
 
     def get_user_details(self, obj):
@@ -150,18 +128,6 @@ class OfferSerializer(serializers.ModelSerializer):
             if not detail.get("offer_type") or detail.get("offer_type").strip() == "":
                 raise serializers.ValidationError({"error": "Offer-type is required"})
         return value
-
-    def create(self, validated_data):
-        """ Creates offer and containig offer_details """
-
-        details_data = validated_data.pop("details", [])
-        user = self.context['request'].user
-
-        offer = OfferModel.objects.create(user=user, **validated_data)
-
-        for detail_data in details_data:
-            OfferDetails.objects.create(offer=offer, **detail_data)
-        return offer
 
     def update(self, instance, validated_data):
         """ Updates given offer_fields. """

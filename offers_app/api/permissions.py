@@ -5,6 +5,7 @@ class IsOwnerOrAdmin(BasePermission):
     """ Custom permission class that grants admin or profile-user full authorization. """
 
     def has_object_permission(self, request, view, obj):
+        """ Grants permission depending if user is admin, owner or staff. """
         if request.user and request.user.is_staff:
             return True
 
@@ -14,6 +15,7 @@ class IsOfferAuthorOrAdmin(BasePermission):
     """ Custom permission class that garants admin or offer-user fullauthorization. """
 
     def has_permission(self, request, view):
+        """ Checks user-role and grants GET and POST-request depending of it. """
         if request.method in SAFE_METHODS:
             return True
 
@@ -29,6 +31,7 @@ class IsOfferAuthorOrAdmin(BasePermission):
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
+        """ Checks user-role and grants PUT, PATCH and DELETE-requests depending of user-role. """
         if request.method in SAFE_METHODS:
             return True
 

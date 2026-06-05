@@ -118,6 +118,7 @@ class UsernameAuthSerializer(serializers.Serializer):
     password = serializers.CharField(style={"input_type": "password"}, trim_whitespace=False)
 
     def validate(self, attrs):
+        """ Validates username and password combination. """
         username = attrs.get("username")
         password = attrs.get("password")
 

@@ -4,6 +4,7 @@ class IsOwnerOrAdmin(BasePermission):
     """ Custom permission class that grants admin or profile-user full authorization. """
 
     def has_object_permission(slef, request, view, obj):
+        """ Grants different requests depending of user-role. """
         if not request.user or not request.user.is_authenticated:
             return False
 
