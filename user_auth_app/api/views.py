@@ -82,3 +82,5 @@ class CustomLoginView(ObtainAuthToken):
         else:
             return Response({"error": "Wrong username or password."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(data)
+
+        
