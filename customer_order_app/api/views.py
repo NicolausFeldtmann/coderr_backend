@@ -34,7 +34,7 @@ class OrderViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated(), IsCustomer()]
         elif self.request.method == "PATCH":
             return [IsAuthenticated(), IsOrderOwner()]
-        return [IsAuthenticated]
+        return [IsAuthenticated()]
 
     def get_serializer_class(self):
         """ Selects serializers for different operations. """
